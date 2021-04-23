@@ -1,0 +1,10 @@
+
+.vs/
+
+api/bin/
+
+api/obj/
+
+*.user
+
+api/appsettings.Development.json
