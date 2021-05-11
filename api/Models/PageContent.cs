@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace api.Models
@@ -17,6 +18,7 @@ namespace api.Models
         public CalendarContent CalendarContent { get; set; }
         public TabContent TabContent { get; set; }
         public FileContent FileContent { get; set; }
+        [JsonIgnore]
         public Page Page { get; set; }
     }
 
