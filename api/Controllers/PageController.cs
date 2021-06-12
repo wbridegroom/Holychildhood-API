@@ -30,23 +30,61 @@ namespace api.Controllers
 
         // GET: api/Page/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Page>> GetPage(int id)
+        public async Task<ActionResult<object>> GetPage(int id)
         {
             var page = await dbContext.Pages
-                .Include(p => p.Parent).ThenInclude(p => p.MenuItem)
-                .Include(p => p.Parent).ThenInclude(p => p.Children)
-                .Include(p => p.MenuItem)
-                .Include(p => p.Children)
-                .Include(p => p.PageContents).ThenInclude(pc => pc.TextContent)
-                .Include(p => p.PageContents).ThenInclude(pc => pc.TabContent).ThenInclude(tc => tc.Tabs).ThenInclude(t => t.TextContent)
-                .Include(p => p.PageContents).ThenInclude(pc => pc.CalendarContent).ThenInclude(cc => cc.Calendar).ThenInclude(c => c.Events)
-                .Include(p => p.PageContents).ThenInclude(pc => pc.FileContent).ThenInclude(fc => fc.Files)
+                .Select(p => new
+                {
+                    p.Id,
+                    p.Title,
+                    p.MenuItem,
+                    Parent = p.Parent != null ? new { p.Parent.Id, p.Parent.Title, p.Parent.MenuItem } : null,
+                    Children = p.Children.Select(c => new {c.Id, c.Title, c.Index}).OrderBy(c => c.Index).ToList(),
+                    PageContents = p.PageContents
+                        .Select(pc => new {
+                            pc.Id,
+                            pc.ContentType,
+                            pc.Index,
+                            pc.HasTitle,
+                            pc.Title,
+                            pc.TextContent,
+                            TabContent = pc.TabContent == null ? null : new
+                            {
+                                pc.TabContent.Id,
+                                Tabs = pc.TabContent.Tabs.Select(t => new { t.Id, t.Title, t.Index, t.TabContentId, t.TextContent })
+                            },
+                            CaldendarContnet = pc.CalendarContent == null ? null : new
+                            {
+                                pc.CalendarContent.Id,
+                                Calendar = pc.CalendarContent.Calendar == null ? null : new
+                                {
+                                    pc.CalendarContent.Calendar.Id,
+                                    pc.CalendarContent.Calendar.Events
+                                }
+                            },
+                            FileContent = pc.FileContent == null ? null : new
+                            {
+                                pc.FileContent.Id,
+                                pc.FileContent.Title,
+                                pc.FileContent.FileType,
+                                pc.FileContent.Files
+                            }
+                        }).OrderBy(pc => pc.Index).ToList(),
+                })
+//                .Include(p => p.Parent).ThenInclude(p => p.MenuItem)
+//                .Include(p => p.Parent).ThenInclude(p => p.Children)
+//                .Include(p => p.MenuItem)
+//                .Include(p => p.Children)
+//                .Include(p => p.PageContents).ThenInclude(pc => pc.TextContent)
+//                .Include(p => p.PageContents).ThenInclude(pc => pc.TabContent).ThenInclude(tc => tc.Tabs).ThenInclude(t => t.TextContent)
+//                .Include(p => p.PageContents).ThenInclude(pc => pc.CalendarContent).ThenInclude(cc => cc.Calendar).ThenInclude(c => c.Events)
+//                .Include(p => p.PageContents).ThenInclude(pc => pc.FileContent).ThenInclude(fc => fc.Files)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (page == null) return NotFound();
 
-            page.Children = page.Children?.OrderBy(c => c.Index).ToList();
-            page.PageContents = page.PageContents?.OrderBy(pc => pc.Index).ToList();
+            //page.Children = page.Children?.OrderBy(c => c.Index).ToList();
+            //page.PageContents = page.PageContents?.OrderBy(pc => pc.Index).ToList();
 
             return page;
         }

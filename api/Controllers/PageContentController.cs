@@ -32,14 +32,39 @@ namespace api.Controllers
         [HttpGet("{id}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<PageContent>> GetPageContent(int id)
+        public async Task<ActionResult<object>> GetPageContent(int id)
         {
             var pageContent = await dbContext.PageContents
-                .Include(pc => pc.TextContent)
-                .Include(pc => pc.TabContent).ThenInclude(tc => tc.Tabs).ThenInclude(t => t.TextContent)
-                .Include(pc => pc.CalendarContent).ThenInclude(cc => cc.Calendar).ThenInclude(c => c.Events)
-                .Include(pc => pc.FileContent).ThenInclude(fc => fc.Files)
-                .OrderBy(pc => pc.Index)
+                .Select(pc => new
+                {
+                    pc.Id,
+                    pc.Index,
+                    pc.TextContent,
+                    TabContent = pc.TabContent == null ? null : new { 
+                        pc.TabContent.Id, 
+                        Tabs = pc.TabContent.Tabs.Select(t => new { t.Id, t.Title, t.Index, t.TabContentId, t.TextContent })
+                    },
+                    CaldendarContnet = pc.CalendarContent == null ? null : new {
+                        pc.CalendarContent.Id,
+                        Calendar = pc.CalendarContent.Calendar == null ? null : new
+                        {
+                            pc.CalendarContent.Calendar.Id,
+                            pc.CalendarContent.Calendar.Events
+                        }
+                    },
+                    FileContent = pc.FileContent == null ? null : new
+                    {
+                        pc.FileContent.Id,
+                        pc.FileContent.Title,
+                        pc.FileContent.FileType,
+                        pc.FileContent.Files
+                    }
+                }).OrderBy(pc => pc.Id)
+                //.Include(pc => pc.TextContent)
+                //.Include(pc => pc.TabContent).ThenInclude(tc => tc.Tabs).ThenInclude(t => t.TextContent)
+                //.Include(pc => pc.CalendarContent).ThenInclude(cc => cc.Calendar).ThenInclude(c => c.Events)
+                //.Include(pc => pc.FileContent).ThenInclude(fc => fc.Files)
+                //.OrderBy(pc => pc.Index)
                 .FirstOrDefaultAsync(pc => pc.Id == id);
 
             if (pageContent == null) return NotFound();

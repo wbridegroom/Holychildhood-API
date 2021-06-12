@@ -8,11 +8,10 @@ namespace api.Models
         public int Id { get; set; }
         public string Title { get; set; }
         public int Index { get; set; }
-        public int? MenuItemId { get; set; }
         [JsonIgnore]
+        public int? MenuItemId { get; set; }
         public MenuItem MenuItem { get; set; }
         public List<PageContent> PageContents { get; set; }
-        [JsonIgnore]
         public Page Parent { get; set; }
         public List<Page> Children { get; set; }
     }

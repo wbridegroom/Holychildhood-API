@@ -26,10 +26,18 @@ namespace api.Controllers
 
         // GET: api/Menu
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<MenuItem>>> GetMenuItems()
+        public async Task<ActionResult<IEnumerable<object>>> GetMenuItems()
         {
-            var menuItems = await dbContext.MenuItems.Include(m => m.Pages).ToListAsync();
-            menuItems.ForEach(m => m.Pages = m.Pages.OrderBy(p => p.Index).ToList());
+            var menuItems = await dbContext.MenuItems
+                .Select(m => new
+                {
+                    m.Id,
+                    m.Name,
+                    Pages = m.Pages.Select(p => new { p.Id, p.Title, p.Index }).OrderBy(p => p.Index).ToList()
+                })
+                //.Include(m => m.Pages)
+                .ToListAsync();
+            //menuItems.ForEach(m => m.Pages = m.Pages.OrderBy(p => p.Index).ToList());
             return menuItems;
         }
 
