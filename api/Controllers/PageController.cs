@@ -43,10 +43,12 @@ namespace api.Controllers
                     PageContents = p.PageContents
                         .Select(pc => new {
                             pc.Id,
+                            pc.PageId,
                             pc.ContentType,
                             pc.Index,
                             pc.HasTitle,
                             pc.Title,
+                            pc.Width,
                             pc.TextContent,
                             TabContent = pc.TabContent == null ? null : new
                             {

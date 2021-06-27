@@ -14,6 +14,7 @@ namespace api.Models
         public string Title { get; set; }
         public int Index { get; set; }
         public int PageId { get; set; }
+        public int Width { get; set; }
         public TextContent TextContent { get; set; }
         public CalendarContent CalendarContent { get; set; }
         public TabContent TabContent { get; set; }

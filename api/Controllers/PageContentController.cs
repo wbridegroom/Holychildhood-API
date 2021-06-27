@@ -117,7 +117,7 @@ namespace api.Controllers
             await dbContext.PageContents.AddAsync(pageContent);
             await dbContext.SaveChangesAsync();
 
-            return CreatedAtAction("GetPageContent", new { id = pageContent.Id }, pageContent);
+            return NoContent();
         }
 
         // DELETE: api/PageContent/5
